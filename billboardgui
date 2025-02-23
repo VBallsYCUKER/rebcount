@@ -1,0 +1,65 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Function to create or update the GUI
+local function createOrUpdateBillboard()
+    -- Check if it already exists
+    local existingGui = playerGui:FindFirstChild("RebirthDisplay")
+    if existingGui then
+        return existingGui
+    end
+
+    -- Create the BillboardGui
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "RebirthDisplay"
+    billboard.Size = UDim2.new(4, 0, 1, 0) -- Adjust size as needed
+    billboard.StudsOffset = Vector3.new(0, 2, 0) -- Position above head
+    billboard.AlwaysOnTop = true
+
+    -- Create a TextLabel inside the BillboardGui
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.TextScaled = true
+    textLabel.Font = Enum.Font.Fantasy
+    textLabel.TextColor3 = Color3.new(1, 1, 0) -- Yellow text
+    textLabel.Parent = billboard
+
+    billboard.Parent = playerGui
+    return billboard
+end
+
+-- Function to update rebirth count
+local function updateRebirths()
+    local billboard = createOrUpdateBillboard()
+    local textLabel = billboard:FindFirstChildOfClass("TextLabel")
+    
+    if textLabel then
+        local data = ReplicatedStorage:FindFirstChild("Datas") and ReplicatedStorage.Datas:FindFirstChild(player.UserId)
+        local rebirths = data and data:FindFirstChild("Rebirth") and data.Rebirth.Value or 0
+        textLabel.Text = "Rebirths: " .. rebirths
+    end
+end
+
+-- Track character and reattach GUI on respawn
+local function onCharacterAdded(character)
+    local head = character:WaitForChild("Head", 5) -- Wait for head to load
+    if head then
+        local billboard = createOrUpdateBillboard()
+        billboard.Adornee = head
+    end
+end
+
+player.CharacterAdded:Connect(onCharacterAdded)
+
+-- Update rebirth count when value changes
+local rebirthData = ReplicatedStorage:FindFirstChild("Datas") and ReplicatedStorage.Datas:FindFirstChild(player.UserId)
+if rebirthData and rebirthData:FindFirstChild("Rebirth") then
+    rebirthData.Rebirth.Changed:Connect(updateRebirths)
+end
+
+updateRebirths() -- Set initial value
+onCharacterAdded(player.Character or player.CharacterAdded:Wait()) -- Attach to current character
