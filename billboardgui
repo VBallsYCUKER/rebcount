@@ -1,4 +1,4 @@
-wait(9)
+wait(6)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -41,7 +41,7 @@ local function updateRebirths()
     if textLabel then
         local data = ReplicatedStorage:FindFirstChild("Datas") and ReplicatedStorage.Datas:FindFirstChild(player.UserId)
         local rebirths = data and data:FindFirstChild("Rebirth") and data.Rebirth.Value or 0
-        textLabel.Text = .. rebirths
+        textLabel.Text = "rebirths" .. rebirths
     end
 end
 
